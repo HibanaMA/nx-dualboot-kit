@@ -1,0 +1,12 @@
+[Unit]
+Description=Restore hekate boot entries (Switch dual-boot)
+After=local-fs.target
+Wants=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/restore-ini.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,43 @@
+#!/bin/bash
+# Switch 鍙岀郴缁熷垏鎹紙Ubuntu 绔級锛歴witch-os android|ubuntu|menu
+#
+# 鏈哄埗锛?#   1) 鍒囨崲鏃舵妸 hekate 鐨?*涓や釜** ini 閮藉啓鎴愮洰鏍囩郴缁?鈫?鏃犺 hekate 鎸?id 杩樻槸鎸?#      浣嶇疆鍖归厤锛岄噸鍚兘浼氳繘鍏ョ洰鏍囩郴缁燂紙璺宠繃鑿滃崟锛夈€?#   2) 寮€鏈哄悗 restore-ini.service 鑷姩鎶婁袱涓?ini 鎭㈠鎴愭爣鍑嗗弻椤癸紝
+#      杩欐牱鍐峰惎鍔紙RCM 娉ㄥ叆 hekate锛夋椂鑿滃崟閲屼袱涓郴缁熼兘鍦ㄣ€?set -e
+
+TARGET="${1:-}"
+SHARE=/mnt/share
+INI_DIR="$SHARE/bootloader/ini"
+TPL=/usr/local/share/switch
+RESTORE=/usr/local/bin/restore-ini.sh
+
+mountpoint -q "$SHARE" || mount /dev/mmcblk0p1 "$SHARE"
+mkdir -p "$INI_DIR"
+
+case "$TARGET" in
+  android|ubuntu|menu) ;;
+  *) echo "鐢ㄦ硶: switch-os android|ubuntu|menu"; exit 1;;
+esac
+
+if [ "$TARGET" = "menu" ]; then
+    "$RESTORE"
+    sync; sleep 1
+    echo "涓や釜鍚姩椤瑰凡鎭㈠锛岄噸鍚繘鍏?hekate 鑿滃崟..."
+    systemctl reboot
+    exit 0
+fi
+
+if [ "$TARGET" = "android" ]; then
+    SRC="$TPL/android.ini"
+else
+    SRC="$TPL/ubuntu.ini"
+fi
+
+# 涓や釜鏂囦欢閮藉啓鎴愮洰鏍囩郴缁燂紙鍏抽敭鏄唴瀹癸紝涓嶆槸鏂囦欢鍚嶏級
+rm -f "$INI_DIR"/*.ini
+cp "$SRC" "$INI_DIR/android.ini"
+cp "$SRC" "$INI_DIR/L4T-jammy.ini"
+
+sync
+sleep 1
+echo "宸茶缃細閲嶅惎鍚庤繘鍏?$TARGET锛堝惎鍔ㄥ畬鎴愬悗浼氳嚜鍔ㄦ仮澶嶅弻椤硅彍鍗曪級"
+systemctl reboot
